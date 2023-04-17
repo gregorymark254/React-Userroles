@@ -1,22 +1,43 @@
 import React, {useState} from 'react'
+import { useNavigate } from 'react-router-dom'
+import { toast } from 'react-toastify';
+import axios from '../api/api'
+
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Login = () => {
 
   const [email,setEmail] = useState("")
   const [password,setPassword] = useState("")
+  const navigate = useNavigate()
 
-  const handleSubmit = (e) => {
+
+  const handleSubmit = async (e) => {
     e.preventDefault()
-
     try {
-
+      const response = await axios.post('/api/v1/login',
+      JSON.stringify({email,password}),
+      {
+        headers: {'Content-Type' : 'application/json'},
+        withCredential : true
+      })
+      localStorage.setItem('userInfo', JSON.stringify(response.data))
+      toast.success("Login Succesful")
+      if (response?.data.roles === [2001]) {
+        navigate('/homes')
+      } else {
+        navigate('/register')
+      }
     } catch (error) {
-      console.log(error)
+      console.log(error.response)
+      toast.error("Wrong username or password")
     }
   }
 
   return (
     <section className="h-screen">
+       <ToastContainer />
       <div className="container h-full px-6 py-24">
         <div className="flex h-full flex-wrap items-center justify-center">
           <div className="mb-12 md:mb-0 md:w-8/12 lg:w-6/12">
@@ -57,6 +78,10 @@ const Login = () => {
                 className="inline-block w-full rounded bg-primary px-7 pt-3 pb-2.5 text-sm font-medium uppercase leading-normal text-white shadow-[0_4px_9px_-4px_#3b71ca] transition duration-150 ease-in-out hover:bg-primary-600 hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:bg-primary-600 focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:outline-none focus:ring-0 active:bg-primary-700 active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)]">
                 Sign in
               </button>
+
+              <div className="mt-3">
+                <span>Don't have an account? <a className="text-primary-600" href="/register"><u>Register Here</u></a></span>
+              </div>
 
             </form>
           </div>
